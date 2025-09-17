@@ -31,7 +31,9 @@
     "jsonwebtoken": "^9.0.2",
     "multer": "^1.4.5-lts.1",
     "nodemailer": "^6.10.1",
-    "pg": "^8.11.3"
+    "pg": "^8.11.3",
+    "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
