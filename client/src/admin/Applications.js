@@ -17,10 +17,6 @@ import {
 import * as XLSX from 'xlsx';
 import AdminNavbar from './AdminNavbar';
 
-// 🔧 New imports
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-
 const API_URL = process.env.REACT_APP_API_URL;
 
 const AdminApplications = () => {
@@ -35,9 +31,6 @@ const AdminApplications = () => {
   const [updating, setUpdating] = useState(false);
   const debounceTimeout = useRef(null);
 
-  // 📌 Ref for the modal to generate PDF
-  const pdfRef = useRef(null);
-
   useEffect(() => {
     fetchApplications();
   }, []);
@@ -48,7 +41,7 @@ const AdminApplications = () => {
     }
     debounceTimeout.current = setTimeout(() => {
       fetchApplications();
-    }, 500);
+    }, 500); // 500ms debounce
 
     return () => {
       if (debounceTimeout.current) {
@@ -97,8 +90,9 @@ const AdminApplications = () => {
         throw new Error('Failed to update application status');
       }
 
-      setApplications(prev => prev.map(app =>
-        app.id === applicationId
+      // Update local state
+      setApplications(prev => prev.map(app => 
+        app.id === applicationId 
           ? { ...app, status: newStatus, admin_notes: notes, review_date: new Date().toISOString() }
           : app
       ));
@@ -111,28 +105,6 @@ const AdminApplications = () => {
     } finally {
       setUpdating(false);
     }
-  };
-
-  // 📌 PDF download function
-  const downloadPDF = async () => {
-    if (!pdfRef.current) return;
-
-    const element = pdfRef.current;
-    const canvas = await html2canvas(element, { scale: 2 });
-    const imgData = canvas.toDataURL('image/png');
-
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'pt',
-      format: 'a4'
-    });
-
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const imgProps = pdf.getImageProperties(imgData);
-    const pdfHeight = (imgProps.height * pageWidth) / imgProps.width;
-
-    pdf.addImage(imgData, 'PNG', 0, 0, pageWidth, pdfHeight);
-    pdf.save(`application_${selectedApplication?.id || 'download'}.pdf`);
   };
 
   const getStatusColor = (status) => {
@@ -172,7 +144,7 @@ const AdminApplications = () => {
     });
   };
 
-  const filteredApplications = applications;
+  const filteredApplications = applications; // Filtering is now handled by the backend
 
   const exportToExcel = () => {
     const exportData = filteredApplications.map(app => ({
@@ -201,10 +173,154 @@ const AdminApplications = () => {
     XLSX.writeFile(workbook, fileName);
   };
 
-  // The rest of your component stays the same until the modal...
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <AlertCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Error</h2>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <button
+            onClick={fetchApplications}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* ... rest of UI above remains unchanged ... */}
+      <AdminNavbar />
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Manage Applications</h1>
+          <p className="text-gray-600">Review and manage all course applications</p>
+        </div>
+
+        {/* Filters and Search */}
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Search by name, course, or code..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-4">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">All Statuses</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+              </select>
+              <button
+                onClick={exportToExcel}
+                disabled={filteredApplications.length === 0}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Export
+              </button>
+              <button
+                onClick={fetchApplications}
+                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+              >
+                Refresh
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Applications List */}
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+        <tr>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Course</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+          <th className="px-2 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredApplications.map((application) => (
+                  <tr key={application.id} className="hover:bg-gray-50">
+                    <td className="px-2 py-4 whitespace-nowrap">{application.id}</td>
+                    <td className="px-2 py-4 whitespace-nowrap">{application.first_name} {application.last_name}</td>
+                    <td className="px-2 py-4 whitespace-nowrap">{application.phone_number}</td>
+                    <td className="px-2 py-4 whitespace-nowrap">{application.email}</td>
+                    <td className="px-2 py-4 whitespace-nowrap">{application.course_name || application.course}</td>
+                    <td className="px-2 py-4 whitespace-nowrap">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(application.status)}`}>
+                        <div className="flex items-center">
+                          {getStatusIcon(application.status)}
+                          <span className="ml-1 capitalize">{application.status}</span>
+                        </div>
+                      </span>
+                    </td>
+                    <td className="px-2 py-4 whitespace-nowrap">{formatDate(application.application_date)}</td>
+                    <td className="px-2 py-4 whitespace-nowrap text-sm font-medium">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          onClick={() => {
+                            setSelectedApplication(application);
+                            setShowModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* No Applications Message */}
+        {filteredApplications.length === 0 && (
+          <div className="bg-white rounded-lg shadow-sm p-8 text-center mt-6">
+            <FileText className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No Applications Found</h3>
+            <p className="text-gray-600">
+              {applications.length === 0 
+                ? 'There are no applications to review yet.'
+                : 'No applications match your current filters.'
+              }
+            </p>
+          </div>
+        )}
+      </div>
 
       {/* Status Update Modal */}
       {showModal && selectedApplication && (
@@ -226,9 +342,7 @@ const AdminApplications = () => {
                 <span className="text-2xl">&times;</span>
               </button>
             </div>
-
-            {/* 📌 Wrap modal content in ref */}
-            <div className="px-6 py-6" ref={pdfRef}>
+            <div className="px-6 py-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div><span className="font-semibold text-gray-700">ID:</span> {selectedApplication.id}</div>
                 <div><span className="font-semibold text-gray-700">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
@@ -252,25 +366,17 @@ const AdminApplications = () => {
                 <div><span className="font-semibold text-gray-700">Application Date:</span> {formatDate(selectedApplication.application_date)}</div>
                 <div className="md:col-span-2"><span className="font-semibold text-gray-700">Admin Notes:</span> {selectedApplication.admin_notes || 'No notes'}</div>
               </div>
-            </div>
-
-            {/* 📌 Download and Close buttons */}
-            <div className="flex justify-end px-6 py-4 border-t border-gray-100">
-              <button
-                onClick={downloadPDF}
-                className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 shadow mr-4"
-              >
-                Download as PDF
-              </button>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setSelectedApplication(null);
-                }}
-                className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow"
-              >
-                Close
-              </button>
+              <div className="flex justify-end mt-8">
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedApplication(null);
+                  }}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow"
+                >
+                  Close
+                </button>
+              </div>
             </div>
           </div>
         </div>
