@@ -99,14 +99,10 @@ const AdminApplications = () => {
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.autoPrint();
       const string = pdf.output('datauristring');
-      const printWindow = window.open('', '_blank');
-      printWindow.document.open();
-      printWindow.document.write(`<iframe width='100%' height='100%' src='${string}'></iframe>`);
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.print();
-      }, 500);
+      const printWindow = window.open(string, '_blank');
+      printWindow.focus();
     });
   };
 
