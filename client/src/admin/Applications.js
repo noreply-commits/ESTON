@@ -352,20 +352,7 @@ const AdminApplications = () => {
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
 
               <div className="flex items-center gap-2">
-                <button
-                  onClick={downloadPDF}
-                  className="text-green-600 hover:text-green-800 focus:outline-none"
-                  title="Download PDF"
-                >
-                  <Download className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={printPDF}
-                  className="text-blue-600 hover:text-blue-800 focus:outline-none"
-                  title="Print PDF"
-                >
-                  <Printer className="h-5 w-5" />
-                </button>
+
                 <button
                   onClick={() => {
                     setShowModal(false);
