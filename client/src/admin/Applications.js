@@ -351,6 +351,7 @@ const AdminApplications = () => {
           <div className="relative mx-auto w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-gray-200 p-0">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
               <div className="flex items-center gap-3">
+                <img src="https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png" alt="Eston IT College Logo" className="h-8 w-8 mr-2" />
                 <FileText className="h-8 w-8 text-blue-600" />
                 <h3 className="text-xl font-bold text-gray-900">Application Details</h3>
               </div>
