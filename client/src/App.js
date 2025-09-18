@@ -35,7 +35,7 @@ function App() {
           <main className="flex-grow">
             <Routes>
               {/* Public Routes */}
-              //<Route path="/" element={<ApplicationForm />} /> {/* Make ApplicationForm the default landing page */}
+              
               <Route path="/login" element={<Login />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/register" element={<Register />} />
