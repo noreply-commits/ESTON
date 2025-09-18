@@ -386,24 +386,24 @@ const AdminApplications = () => {
 
                 <div><span className="font-semibold text-gray-900">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
                 <div><span className="font-semibold text-gray-900">Phone Number:</span> {selectedApplication.phone_number}</div>
-                <div><span className="font-semibold text-gray-700">Email:</span> {selectedApplication.email}</div>
-                <div><span className="font-semibold text-gray-700">Gender:</span> {selectedApplication.gender}</div>
-                <div><span className="font-semibold text-gray-700">Nationality:</span> {selectedApplication.nationality}</div>
-                <div><span className="font-semibold text-gray-700">Residential Address:</span> {selectedApplication.residential_address}</div>
-                <div><span className="font-semibold text-gray-700">Street Address:</span> {selectedApplication.street_address}</div>
-                <div><span className="font-semibold text-gray-700">Street Address Line 2:</span> {selectedApplication.street_address_line_2}</div>
-                <div><span className="font-semibold text-gray-700">City/State/Province:</span> {selectedApplication.city_state_province}</div>
-                <div><span className="font-semibold text-gray-700">Country:</span> {selectedApplication.country}</div>
-                <div><span className="font-semibold text-gray-700">Course:</span> {selectedApplication.course_name || selectedApplication.course}</div>
-                <div><span className="font-semibold text-gray-700">Institution Name:</span> {selectedApplication.institution_name}</div>
-                <div><span className="font-semibold text-gray-700">Highest Education:</span> {selectedApplication.highest_education}</div>
-                <div><span className="font-semibold text-gray-700">Date of Birth:</span> {selectedApplication.date_of_birth}</div>
-                <div><span className="font-semibold text-gray-700">Reason For Course:</span> {selectedApplication.reason_for_course}</div>
-                <div><span className="font-semibold text-gray-700">How Heard:</span> {selectedApplication.how_hear}</div>
-                <div><span className="font-semibold text-gray-700">Declaration:</span> {selectedApplication.declaration ? 'Yes' : 'No'}</div>
-                <div><span className="font-semibold text-gray-700">Status:</span> {selectedApplication.status}</div>
-                <div><span className="font-semibold text-gray-700">Application Date:</span> {formatDate(selectedApplication.application_date)}</div>
-                <div className="md:col-span-2"><span className="font-semibold text-gray-700">Admin Notes:</span> {selectedApplication.admin_notes || 'No notes'}</div>
+                <div><span className="font-semibold text-gray-900">Email:</span> {selectedApplication.email}</div>
+                <div><span className="font-semibold text-gray-900">Gender:</span> {selectedApplication.gender}</div>
+                <div><span className="font-semibold text-gray-900">Nationality:</span> {selectedApplication.nationality}</div>
+                <div><span className="font-semibold text-gray-900">Residential Address:</span> {selectedApplication.residential_address}</div>
+                <div><span className="font-semibold text-gray-900">Street Address:</span> {selectedApplication.street_address}</div>
+                <div><span className="font-semibold text-gray-900">Street Address Line 2:</span> {selectedApplication.street_address_line_2}</div>
+                <div><span className="font-semibold text-gray-900">City/State/Province:</span> {selectedApplication.city_state_province}</div>
+                <div><span className="font-semibold text-gray-900">Country:</span> {selectedApplication.country}</div>
+                <div><span className="font-semibold text-gray-900">Course:</span> {selectedApplication.course_name || selectedApplication.course}</div>
+                <div><span className="font-semibold text-gray-900">Institution Name:</span> {selectedApplication.institution_name}</div>
+                <div><span className="font-semibold text-gray-900">Highest Education:</span> {selectedApplication.highest_education}</div>
+                <div><span className="font-semibold text-gray-900">Date of Birth:</span> {selectedApplication.date_of_birth}</div>
+                <div><span className="font-semibold text-gray-900">Reason For Course:</span> {selectedApplication.reason_for_course}</div>
+                <div><span className="font-semibold text-gray-900">How Heard:</span> {selectedApplication.how_hear}</div>
+                <div><span className="font-semibold text-gray-900">Declaration:</span> {selectedApplication.declaration ? 'Yes' : 'No'}</div>
+                <div><span className="font-semibold text-gray-900">Status:</span> {selectedApplication.status}</div>
+                <div><span className="font-semibold text-gray-900">Application Date:</span> {formatDate(selectedApplication.application_date)}</div>
+                <div className="md:col-span-2"><span className="font-semibold text-gray-900">Admin Notes:</span> {selectedApplication.admin_notes || 'No notes'}</div>
               </div>
               <div className="flex justify-end mt-8">
 
