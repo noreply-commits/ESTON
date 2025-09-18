@@ -56,7 +56,6 @@ const createTables = async () => {
 
 
     await pool.query(`
-    delete from applications;
       CREATE TABLE IF NOT EXISTS applications (
         id SERIAL PRIMARY KEY,
         first_name VARCHAR(255) NOT NULL,
