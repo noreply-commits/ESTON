@@ -384,8 +384,8 @@ const AdminApplications = () => {
             <div className="px-6 py-6" ref={modalContentRef}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
 
-                <div><span className="text-xl font-bold text-gray-900">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
-                <div><span className="text-xl font-bold text-gray-900">Phone Number:</span> {selectedApplication.phone_number}</div>
+                <div><span className="font-semibold text-gray-900">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
+                <div><span className="font-semibold text-gray-900">Phone Number:</span> {selectedApplication.phone_number}</div>
                 <div><span className="font-semibold text-gray-700">Email:</span> {selectedApplication.email}</div>
                 <div><span className="font-semibold text-gray-700">Gender:</span> {selectedApplication.gender}</div>
                 <div><span className="font-semibold text-gray-700">Nationality:</span> {selectedApplication.nationality}</div>
