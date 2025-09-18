@@ -100,10 +100,13 @@ const AdminApplications = () => {
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
       pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
       const string = pdf.output('datauristring');
-      const x = window.open();
-      x.document.open();
-      x.document.write(`<iframe width='100%' height='100%' src='${string}'></iframe>`);
-      x.document.close();
+      const printWindow = window.open('', '_blank');
+      printWindow.document.open();
+      printWindow.document.write(`<iframe width='100%' height='100%' src='${string}'></iframe>`);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+      }, 500);
     });
   };
 
@@ -383,7 +386,15 @@ const AdminApplications = () => {
                 <div className="md:col-span-2"><span className="font-semibold text-gray-700">Admin Notes:</span> {selectedApplication.admin_notes || 'No notes'}</div>
               </div>
               <div className="flex justify-end mt-8">
-
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedApplication(null);
+                  }}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
