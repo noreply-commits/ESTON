@@ -88,7 +88,7 @@ const AdminApplications = () => {
     pdf.setFontSize(18);
     pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
 
-    html2canvas(modalContentRef.current).then(canvas => {
+    html2canvas(modalContentRef.current, { useCORS: true }).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pageWidth - margin * 2;
@@ -111,7 +111,7 @@ const AdminApplications = () => {
     pdf.setFontSize(18);
     pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
 
-    html2canvas(modalContentRef.current).then(canvas => {
+    html2canvas(modalContentRef.current, { useCORS: true }).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pageWidth - margin * 2;
@@ -350,10 +350,7 @@ const AdminApplications = () => {
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="relative mx-auto w-full max-w-2xl bg-white rounded-xl shadow-2xl border border-gray-200 p-0">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-              <div className="flex items-center gap-3">
-                <FileText className="h-8 w-8 text-blue-600" />
-                <h3 className="text-xl font-bold text-gray-900">Application Details</h3>
-              </div>
+
               <div className="flex items-center gap-2">
                 <button
                   onClick={downloadPDF}
