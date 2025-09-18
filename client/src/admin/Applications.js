@@ -98,25 +98,63 @@ const AdminApplications = () => {
     });
   };
 
-  // Function to print the modal content as PDF
-  const printPDF = () => {
-    if (!modalContentRef.current) return;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const headerHeight = 30;
+  // Function to print the modal content as PDF or a specific application
+  const printPDF = async (applicationToPrint = selectedApplication) => {
+    if (!applicationToPrint) return;
 
-    // Add header text
-    pdf.setFontSize(18);
-    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
+    const printContent = document.createElement('div');
+    printContent.style.padding = '20px';
+    printContent.style.fontFamily = 'Arial, sans-serif';
+    printContent.innerHTML = `
+      <div style="text-align: center; margin-bottom: 20px;">
+        <img src="https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png" style="max-width: 150px; margin-bottom: 10px;">
+        <h3 style="font-size: 24px; color: #1a202c;">Eston College Applicant</h3>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+        <div><span style="font-weight: bold; color: #2d3748;">Name:</span> ${applicationToPrint.first_name} ${applicationToPrint.middle_name || ''} ${applicationToPrint.last_name}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Phone Number:</span> ${applicationToPrint.phone_number}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Email:</span> ${applicationToPrint.email}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Gender:</span> ${applicationToPrint.gender}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Nationality:</span> ${applicationToPrint.nationality}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Residential Address:</span> ${applicationToPrint.residential_address}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Street Address:</span> ${applicationToPrint.street_address}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Street Address Line 2:</span> ${applicationToPrint.street_address_line_2 || ''}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">City/State/Province:</span> ${applicationToPrint.city_state_province || ''}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Country:</span> ${applicationToPrint.country}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Course:</span> ${applicationToPrint.course_name || applicationToPrint.course}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Institution Name:</span> ${applicationToPrint.institution_name || ''}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Highest Education:</span> ${applicationToPrint.highest_education}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Date of Birth:</span> ${applicationToPrint.date_of_birth}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Reason For Course:</span> ${applicationToPrint.reason_for_course}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">How Heard:</span> ${applicationToPrint.how_hear}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Declaration:</span> ${applicationToPrint.declaration ? 'Yes' : 'No'}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Status:</span> ${applicationToPrint.status}</div>
+        <div><span style="font-weight: bold; color: #2d3748;">Application Date:</span> ${formatDate(applicationToPrint.application_date)}</div>
+        <div style="grid-column: span 2;"><span style="font-weight: bold; color: #2d3748;">Admin Notes:</span> ${applicationToPrint.admin_notes || 'No notes'}</div>
+      </div>
+    `;
 
-    html2canvas(modalContentRef.current, { useCORS: true }).then(canvas => {
+    document.body.appendChild(printContent);
+
+    try {
+      const canvas = await html2canvas(printContent, { useCORS: true });
       const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const margin = 20;
+      const headerHeight = 30; // Adjusted for the new header content
+
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pageWidth - margin * 2;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
+
+      let currentY = margin;
+
+      // Add the rendered content
+      pdf.addImage(imgData, 'PNG', margin, currentY, pdfWidth, pdfHeight);
+      currentY += pdfHeight + margin;
+
       pdf.autoPrint();
       const blob = pdf.output('blob');
       const url = URL.createObjectURL(blob);
@@ -127,7 +165,12 @@ const AdminApplications = () => {
       } else {
         alert('Popup blocked. Please allow popups for this site.');
       }
-    });
+    } catch (error) {
+      console.error("Error generating PDF for printing:", error);
+      alert("Failed to generate PDF for printing. Please try again.");
+    } finally {
+      document.body.removeChild(printContent);
+    }
   };
 
   const getStatusColor = (status) => {
@@ -311,18 +354,23 @@ const AdminApplications = () => {
                     <td className="px-2 py-4 whitespace-nowrap">{formatDate(application.application_date)}</td>
                     <td className="px-2 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-<button
-  onClick={() => {
-    setSelectedApplication(application);
-    setShowModal(true);
-    window.print(); // This opens the print dialog
-  }}
-  className="text-blue-600 hover:text-blue-900"
-  title="View Details"
->
-  <Eye className="h-4 w-4" />
-</button>
-
+                        <button
+                          onClick={() => {
+                            setSelectedApplication(application);
+                            setShowModal(true);
+                          }}
+                          className="text-blue-600 hover:text-blue-900"
+                          title="View Details"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </button>
+                        <button
+                          onClick={() => printPDF(application)}
+                          className="text-indigo-600 hover:text-indigo-900 ml-2"
+                          title="Print Application"
+                        >
+                          <Printer className="h-4 w-4" />
+                        </button>
                       </div>
                     </td>
                   </tr>
