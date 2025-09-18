@@ -386,6 +386,7 @@ const AdminApplications = () => {
                 <div>
                 <img src="https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png" />
                 </div>
+                    <div></div>
                 <div><span className="font-semibold text-gray-900">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
                 <div><span className="font-semibold text-gray-900">Phone Number:</span> {selectedApplication.phone_number}</div>
                 <div><span className="font-semibold text-gray-900">Email:</span> {selectedApplication.email}</div>
