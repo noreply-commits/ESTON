@@ -78,13 +78,22 @@ const AdminApplications = () => {
   // Function to download the modal content as PDF
   const downloadPDF = () => {
     if (!modalContentRef.current) return;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const headerHeight = 30;
+
+    // Add header text
+    pdf.setFontSize(18);
+    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
+
     html2canvas(modalContentRef.current).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'pt', 'a4');
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfWidth = pageWidth - margin * 2;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
       pdf.save(`application_${selectedApplication.id}.pdf`);
     });
   };
@@ -92,13 +101,22 @@ const AdminApplications = () => {
   // Function to print the modal content as PDF
   const printPDF = () => {
     if (!modalContentRef.current) return;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const headerHeight = 30;
+
+    // Add header text
+    pdf.setFontSize(18);
+    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
+
     html2canvas(modalContentRef.current).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'pt', 'a4');
       const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfWidth = pageWidth - margin * 2;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
       pdf.autoPrint();
       const blob = pdf.output('blob');
       const url = URL.createObjectURL(blob);
@@ -365,7 +383,7 @@ const AdminApplications = () => {
             </div>
             <div className="px-6 py-6" ref={modalContentRef}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-               
+                <div><span className="font-semibold text-gray-700">ID:</span> {selectedApplication.id}</div>
                 <div><span className="font-semibold text-gray-700">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
                 <div><span className="font-semibold text-gray-700">Phone Number:</span> {selectedApplication.phone_number}</div>
                 <div><span className="font-semibold text-gray-700">Email:</span> {selectedApplication.email}</div>
@@ -388,7 +406,15 @@ const AdminApplications = () => {
                 <div className="md:col-span-2"><span className="font-semibold text-gray-700">Admin Notes:</span> {selectedApplication.admin_notes || 'No notes'}</div>
               </div>
               <div className="flex justify-end mt-8">
-
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedApplication(null);
+                  }}
+                  className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 shadow"
+                >
+                  Close
+                </button>
               </div>
             </div>
           </div>
