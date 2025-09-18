@@ -311,16 +311,18 @@ const AdminApplications = () => {
                     <td className="px-2 py-4 whitespace-nowrap">{formatDate(application.application_date)}</td>
                     <td className="px-2 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => {
-                            setSelectedApplication(application);
-                            setShowModal(true);
-                          }}
-                          className="text-blue-600 hover:text-blue-900"
-                          title="View Details"
-                        >
-                          <Eye className="h-4 w-4" />
-                        </button>
+<button
+  onClick={() => {
+    setSelectedApplication(application);
+    setShowModal(true);
+    window.print(); // This opens the print dialog
+  }}
+  className="text-blue-600 hover:text-blue-900"
+  title="View Details"
+>
+  <Eye className="h-4 w-4" />
+</button>
+
                       </div>
                     </td>
                   </tr>
