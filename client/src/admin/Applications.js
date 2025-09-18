@@ -12,9 +12,12 @@ import {
   Edit,
   Check,
   X,
-  Download
+  Download,
+  Printer
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import AdminNavbar from './AdminNavbar';
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -30,6 +33,7 @@ const AdminApplications = () => {
   const [showModal, setShowModal] = useState(false);
   const [updating, setUpdating] = useState(false);
   const debounceTimeout = useRef(null);
+  const modalContentRef = useRef(null);
 
   useEffect(() => {
     fetchApplications();
@@ -71,40 +75,36 @@ const AdminApplications = () => {
     }
   };
 
-  const handleStatusUpdate = async (applicationId, newStatus, notes = '') => {
-    setUpdating(true);
-    try {
-      const response = await fetch(`${API_URL}/api/applications/${applicationId}/status`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          status: newStatus,
-          admin_notes: notes
-        })
-      });
+  // Function to download the modal content as PDF
+  const downloadPDF = () => {
+    if (!modalContentRef.current) return;
+    html2canvas(modalContentRef.current).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`application_${selectedApplication.id}.pdf`);
+    });
+  };
 
-      if (!response.ok) {
-        throw new Error('Failed to update application status');
-      }
-
-      // Update local state
-      setApplications(prev => prev.map(app => 
-        app.id === applicationId 
-          ? { ...app, status: newStatus, admin_notes: notes, review_date: new Date().toISOString() }
-          : app
-      ));
-
-      setShowModal(false);
-      setSelectedApplication(null);
-      alert('Application status updated successfully!');
-    } catch (err) {
-      alert(err.message);
-    } finally {
-      setUpdating(false);
-    }
+  // Function to print the modal content as PDF
+  const printPDF = () => {
+    if (!modalContentRef.current) return;
+    html2canvas(modalContentRef.current).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'pt', 'a4');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      const string = pdf.output('datauristring');
+      const x = window.open();
+      x.document.open();
+      x.document.write(`<iframe width='100%' height='100%' src='${string}'></iframe>`);
+      x.document.close();
+    });
   };
 
   const getStatusColor = (status) => {
@@ -331,18 +331,34 @@ const AdminApplications = () => {
                 <FileText className="h-8 w-8 text-blue-600" />
                 <h3 className="text-xl font-bold text-gray-900">Application Details</h3>
               </div>
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setSelectedApplication(null);
-                }}
-                className="text-gray-400 hover:text-gray-700 focus:outline-none"
-                title="Close"
-              >
-                <span className="text-2xl">&times;</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={downloadPDF}
+                  className="text-green-600 hover:text-green-800 focus:outline-none"
+                  title="Download PDF"
+                >
+                  <Download className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={printPDF}
+                  className="text-blue-600 hover:text-blue-800 focus:outline-none"
+                  title="Print PDF"
+                >
+                  <Printer className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedApplication(null);
+                  }}
+                  className="text-gray-400 hover:text-gray-700 focus:outline-none"
+                  title="Close"
+                >
+                  <span className="text-2xl">&times;</span>
+                </button>
+              </div>
             </div>
-            <div className="px-6 py-6">
+            <div className="px-6 py-6" ref={modalContentRef}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
                 <div><span className="font-semibold text-gray-700">ID:</span> {selectedApplication.id}</div>
                 <div><span className="font-semibold text-gray-700">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
