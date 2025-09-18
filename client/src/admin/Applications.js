@@ -73,29 +73,6 @@ const AdminApplications = () => {
     }
   };
 
-  // Function to download the modal content as PDF
-  const downloadPDF = () => {
-    if (!modalContentRef.current) return;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const headerHeight = 30;
-
-    // Add header text
-    pdf.setFontSize(18);
-    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
-
-    html2canvas(modalContentRef.current).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pageWidth - margin * 2;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
-      pdf.save(`application_${selectedApplication.id}.pdf`);
-    });
-  };
-
   // Function to print the modal content
   const printPDF = () => {
     if (!modalContentRef.current) return;
@@ -328,13 +305,6 @@ const AdminApplications = () => {
                 <h3 className="text-xl font-bold text-gray-900">Application Details</h3>
               </div>
               <div className="flex items-center gap-2">
-                <button
-                  onClick={downloadPDF}
-                  className="text-green-600 hover:text-green-800 focus:outline-none"
-                  title="Download PDF"
-                >
-                  <Download className="h-5 w-5" />
-                </button>
                 <button
                   onClick={printPDF}
                   className="text-blue-600 hover:text-blue-800 focus:outline-none"
