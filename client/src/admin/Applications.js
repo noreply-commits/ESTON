@@ -91,6 +91,7 @@ const AdminApplications = () => {
   const downloadPDF = async () => {
     if (!modalContentRef.current) return;
 
+    let tempDiv = null; // Declare tempDiv outside try block
     try {
       const logoImg = await loadImage(LOGO_URL);
 
@@ -112,7 +113,7 @@ const AdminApplications = () => {
       currentY += 30; // Space after header text
 
       // Create a temporary div to render modal content without the image
-      const tempDiv = document.createElement('div');
+      tempDiv = document.createElement('div'); // Assign to tempDiv
       // Clone the content of modalContentRef.current
       const clonedContent = modalContentRef.current.cloneNode(true);
       // Remove the image element from the cloned content
@@ -133,10 +134,13 @@ const AdminApplications = () => {
       pdf.addImage(imgData, 'PNG', margin, currentY, pdfWidth, pdfHeight);
       pdf.save(`application_${selectedApplication.id}.pdf`);
 
-      document.body.removeChild(tempDiv); // Clean up temporary div
     } catch (error) {
       console.error("Error generating PDF for download:", error);
       alert("Failed to generate PDF for download. Please try again.");
+    } finally {
+      if (tempDiv) { // Only remove if it was created
+        document.body.removeChild(tempDiv); // Clean up temporary div
+      }
     }
   };
 
@@ -144,6 +148,7 @@ const AdminApplications = () => {
   const printPDF = async (applicationToPrint = selectedApplication) => {
     if (!applicationToPrint) return;
 
+    let printContent = null; // Declare printContent outside try block
     try {
       const logoImg = await loadImage(LOGO_URL);
 
@@ -164,7 +169,7 @@ const AdminApplications = () => {
       pdf.text('Eston College Applicant', pageWidth / 2, currentY, { align: 'center' });
       currentY += 30; // Space after header text
 
-      const printContent = document.createElement('div');
+      printContent = document.createElement('div'); // Assign to printContent
       printContent.style.padding = '0px'; // Padding handled by margins
       printContent.style.fontFamily = 'Arial, sans-serif';
       printContent.innerHTML = `
@@ -218,7 +223,9 @@ const AdminApplications = () => {
       console.error("Error generating PDF for printing:", error);
       alert("Failed to generate PDF for printing. Please try again.");
     } finally {
-      document.body.removeChild(printContent);
+      if (printContent) { // Only remove if it was created
+        document.body.removeChild(printContent);
+      }
     }
   };
 
