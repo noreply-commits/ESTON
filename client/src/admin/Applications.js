@@ -75,140 +75,48 @@ const AdminApplications = () => {
     }
   };
 
-  const LOGO_URL = "https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png";
+  // Function to download the modal content as PDF
+  const downloadPDF = () => {
+    if (!modalContentRef.current) return;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const headerHeight = 30;
 
-  const loadImage = (url) => {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = "Anonymous"; // This is crucial for CORS
-      img.onload = () => resolve(img);
-      img.onerror = (e) => reject(e);
-      img.src = url;
+    // Add header text
+    pdf.setFontSize(18);
+    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
+
+    html2canvas(modalContentRef.current).then(canvas => {
+      const imgData = canvas.toDataURL('image/png');
+      const imgProps = pdf.getImageProperties(imgData);
+      const pdfWidth = pageWidth - margin * 2;
+      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
+      pdf.save(`application_${selectedApplication.id}.pdf`);
     });
   };
 
-  // Function to download the modal content as PDF
-  const downloadPDF = async () => {
+  // Function to print the modal content as PDF
+  const printPDF = () => {
     if (!modalContentRef.current) return;
+    const pdf = new jsPDF('p', 'pt', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const margin = 20;
+    const headerHeight = 30;
 
-    let tempDiv = null; // Declare tempDiv outside try block
-    try {
-      const logoImg = await loadImage(LOGO_URL);
+    // Add header text
+    pdf.setFontSize(18);
+    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
 
-      const pdf = new jsPDF('p', 'pt', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-      let currentY = margin;
-
-      // Add logo directly
-      const logoWidth = 150;
-      const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
-      const logoX = (pageWidth - logoWidth) / 2;
-      pdf.addImage(logoImg, 'PNG', logoX, currentY, logoWidth, logoHeight);
-      currentY += logoHeight + 10; // Space after logo
-
-      // Add header text below logo
-      pdf.setFontSize(18);
-      pdf.text('Eston College Applicant', pageWidth / 2, currentY, { align: 'center' });
-      currentY += 30; // Space after header text
-
-      // Create a temporary div to render modal content without the image
-      tempDiv = document.createElement('div'); // Assign to tempDiv
-      // Clone the content of modalContentRef.current
-      const clonedContent = modalContentRef.current.cloneNode(true);
-      // Remove the image element from the cloned content
-      const imgElement = clonedContent.querySelector('img[src="' + LOGO_URL + '"]');
-      if (imgElement) {
-        imgElement.remove();
-      }
-      tempDiv.appendChild(clonedContent);
-      document.body.appendChild(tempDiv); // Append to body for html2canvas to render
-
-      const canvas = await html2canvas(tempDiv, { useCORS: true });
+    html2canvas(modalContentRef.current).then(canvas => {
       const imgData = canvas.toDataURL('image/png');
       const imgProps = pdf.getImageProperties(imgData);
       const pdfWidth = pageWidth - margin * 2;
       const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      // Add the rest of the content from html2canvas
-      pdf.addImage(imgData, 'PNG', margin, currentY, pdfWidth, pdfHeight);
-      pdf.save(`application_${selectedApplication.id}.pdf`);
-
-    } catch (error) {
-      console.error("Error generating PDF for download:", error);
-      alert("Failed to generate PDF for download. Please try again.");
-    } finally {
-      if (tempDiv) { // Only remove if it was created
-        document.body.removeChild(tempDiv); // Clean up temporary div
-      }
-    }
-  };
-
-  // Function to print the modal content as PDF or a specific application
-  const printPDF = async (applicationToPrint = selectedApplication) => {
-    if (!applicationToPrint) return;
-
-    let printContent = null; // Declare printContent outside try block
-    try {
-      const logoImg = await loadImage(LOGO_URL);
-
-      const pdf = new jsPDF('p', 'pt', 'a4');
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-      let currentY = margin;
-
-      // Add logo directly
-      const logoWidth = 150;
-      const logoHeight = (logoImg.height * logoWidth) / logoImg.width;
-      const logoX = (pageWidth - logoWidth) / 2;
-      pdf.addImage(logoImg, 'PNG', logoX, currentY, logoWidth, logoHeight);
-      currentY += logoHeight + 10; // Space after logo
-
-      // Add header text below logo
-      pdf.setFontSize(18);
-      pdf.text('Eston College Applicant', pageWidth / 2, currentY, { align: 'center' });
-      currentY += 30; // Space after header text
-
-      printContent = document.createElement('div'); // Assign to printContent
-      printContent.style.padding = '0px'; // Padding handled by margins
-      printContent.style.fontFamily = 'Arial, sans-serif';
-      printContent.innerHTML = `
-        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">
-          <div><span style="font-weight: bold; color: #2d3748;">Name:</span> ${applicationToPrint.first_name} ${applicationToPrint.middle_name || ''} ${applicationToPrint.last_name}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Phone Number:</span> ${applicationToPrint.phone_number}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Email:</span> ${applicationToPrint.email}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Gender:</span> ${applicationToPrint.gender}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Nationality:</span> ${applicationToPrint.nationality}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Residential Address:</span> ${applicationToPrint.residential_address}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Street Address:</span> ${applicationToPrint.street_address}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Street Address Line 2:</span> ${applicationToPrint.street_address_line_2 || ''}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">City/State/Province:</span> ${applicationToPrint.city_state_province || ''}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Country:</span> ${applicationToPrint.country}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Course:</span> ${applicationToPrint.course_name || applicationToPrint.course}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Institution Name:</span> ${applicationToPrint.institution_name || ''}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Highest Education:</span> ${applicationToPrint.highest_education}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Date of Birth:</span> ${applicationToPrint.date_of_birth}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Reason For Course:</span> ${applicationToPrint.reason_for_course}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">How Heard:</span> ${applicationToPrint.how_hear}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Declaration:</span> ${applicationToPrint.declaration ? 'Yes' : 'No'}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Status:</span> ${applicationToPrint.status}</div>
-          <div><span style="font-weight: bold; color: #2d3748;">Application Date:</span> ${formatDate(applicationToPrint.application_date)}</div>
-          <div style="grid-column: span 2;"><span style="font-weight: bold; color: #2d3748;">Admin Notes:</span> ${applicationToPrint.admin_notes || 'No notes'}</div>
-        </div>
-      `;
-
-      document.body.appendChild(printContent);
-
-      const canvas = await html2canvas(printContent, { useCORS: true });
-      const imgData = canvas.toDataURL('image/png');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pageWidth - margin * 2;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-      // Add the rendered content
-      pdf.addImage(imgData, 'PNG', margin, currentY, pdfWidth, pdfHeight);
-      currentY += pdfHeight + margin;
-
+      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
       pdf.autoPrint();
       const blob = pdf.output('blob');
       const url = URL.createObjectURL(blob);
@@ -219,14 +127,7 @@ const AdminApplications = () => {
       } else {
         alert('Popup blocked. Please allow popups for this site.');
       }
-    } catch (error) {
-      console.error("Error generating PDF for printing:", error);
-      alert("Failed to generate PDF for printing. Please try again.");
-    } finally {
-      if (printContent) { // Only remove if it was created
-        document.body.removeChild(printContent);
-      }
-    }
+    });
   };
 
   const getStatusColor = (status) => {
@@ -420,13 +321,6 @@ const AdminApplications = () => {
                         >
                           <Eye className="h-4 w-4" />
                         </button>
-                        <button
-                          onClick={() => printPDF(application)}
-                          className="text-indigo-600 hover:text-indigo-900 ml-2"
-                          title="Print Application"
-                        >
-                          <Printer className="h-4 w-4" />
-                        </button>
                       </div>
                     </td>
                   </tr>
@@ -486,8 +380,7 @@ const AdminApplications = () => {
             </div>
             <div className="px-6 py-6" ref={modalContentRef}>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
-                  <div><img src="https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png"></img></div> 
-                  <div></div>
+                <div> <img src="https://www.eston.edu.gh/wp-content/uploads/2025/01/Eston-IT-College-logo.png"></div> 
                 <div><span className="font-semibold text-gray-900">Name:</span> {selectedApplication.first_name} {selectedApplication.middle_name} {selectedApplication.last_name}</div>
                 <div><span className="font-semibold text-gray-900">Phone Number:</span> {selectedApplication.phone_number}</div>
                 <div><span className="font-semibold text-gray-900">Email:</span> {selectedApplication.email}</div>
