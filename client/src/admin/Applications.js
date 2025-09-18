@@ -16,8 +16,6 @@ import {
   Printer
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import AdminNavbar from './AdminNavbar';
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -98,36 +96,11 @@ const AdminApplications = () => {
     });
   };
 
-  // Function to print the modal content as PDF
+  // Function to print the modal content
   const printPDF = () => {
     if (!modalContentRef.current) return;
-    const pdf = new jsPDF('p', 'pt', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 20;
-    const headerHeight = 30;
-
-    // Add header text
-    pdf.setFontSize(18);
-    pdf.text('Eston College Applicant', pageWidth / 2, margin, { align: 'center' });
-
-    html2canvas(modalContentRef.current).then(canvas => {
-      const imgData = canvas.toDataURL('image/png');
-      const imgProps = pdf.getImageProperties(imgData);
-      const pdfWidth = pageWidth - margin * 2;
-      const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-      pdf.addImage(imgData, 'PNG', margin, margin + headerHeight, pdfWidth, pdfHeight);
-      pdf.autoPrint();
-      const blob = pdf.output('blob');
-      const url = URL.createObjectURL(blob);
-      const printWindow = window.open(url, '_blank');
-      if (printWindow) {
-        printWindow.focus();
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-      } else {
-        alert('Popup blocked. Please allow popups for this site.');
-      }
-    });
+    // Trigger the browser's native print dialog
+    window.print();
   };
 
   const getStatusColor = (status) => {
