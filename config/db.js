@@ -1,37 +1,28 @@
 const { Pool } = require('pg');
+const bcrypt = require('bcryptjs');
 
+// Create a new connection pool using Supabase DATABASE_URL
 const pool = new Pool({
-  host: 'db.nvlnyhyldrpuvhjwfjxc.supabase.co',
-  port: 5432,
-  database: 'postgres',
-  user: 'postgres',
-  password: 'Techland@244190',
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
-    rejectUnauthorized: false, // Important for Supabase SSL
+    rejectUnauthorized: false, // Required for Supabase SSL
   },
 });
 
-
-
-
-
-// Test the connection
+// Event listeners for connection success/errors
 pool.on('connect', () => {
-  console.log('Connected to PostgreSQL database');
+  console.log('✅ Connected to Supabase PostgreSQL database');
 });
 
 pool.on('error', (err) => {
-  console.error('Unexpected error on idle client', err);
+  console.error('❌ Unexpected error on idle PostgreSQL client', err);
   process.exit(-1);
 });
 
-// Create tables if they don't exist
+// Create necessary tables and default data
 const createTables = async () => {
   try {
-    // Users table
+    // Create users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -43,10 +34,10 @@ const createTables = async () => {
         role VARCHAR(20) DEFAULT 'student',
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+      );
     `);
 
-    // Courses table
+    // Create courses table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS courses (
         id SERIAL PRIMARY KEY,
@@ -58,10 +49,10 @@ const createTables = async () => {
         fee DECIMAL(10,2),
         is_active BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      )
+      );
     `);
 
-
+    // Create applications table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS applications (
         id SERIAL PRIMARY KEY,
@@ -87,34 +78,27 @@ const createTables = async () => {
         application_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
         review_date TIMESTAMP,
         admin_notes TEXT
-      )
+      );
     `);
 
-    // Insert dummy data into applications table
- 
-
-
-    // Insert default admin user if not exists
+    // Insert default admin user if it doesn't exist
     const adminCheck = await pool.query('SELECT * FROM users WHERE email = $1', ['admin@eston.edu.gh']);
     if (adminCheck.rows.length === 0) {
-      const bcrypt = require('bcryptjs');
       const hashedPassword = await bcrypt.hash('admin123', 10);
       await pool.query(`
         INSERT INTO users (email, password, first_name, last_name, role)
         VALUES ($1, $2, $3, $4, $5)
       `, ['admin@eston.edu.gh', hashedPassword, 'Admin', 'User', 'admin']);
-      console.log('Default admin user created');
+      console.log('✅ Default admin user created');
     }
 
-    // Insert sample courses if not exists
-
-
-    console.log('Database tables created successfully');
+    console.log('✅ Database tables created or already exist');
   } catch (error) {
-    console.error('Error creating tables:', error);
+    console.error('❌ Error creating tables:', error);
   }
 };
 
+// Export for use in server
 module.exports = {
   query: (text, params) => pool.query(text, params),
   createTables
