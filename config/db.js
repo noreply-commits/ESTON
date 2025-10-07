@@ -1,15 +1,16 @@
 const { Pool } = require('pg');
 
 const pool = new Pool({
-  host: process.env.DB_HOST || 'dpg-d2tver7fte5s73akuko0-a',
-  port: process.env.DB_PORT || 5432,
-  database: process.env.DB_NAME || 'eston',
-  user: process.env.DB_USER || 'eston',
-  password: process.env.DB_PASSWORD || '3imVIm6JKjF9RgkVpV4TYwAH4XNDMWm5',
+  host: 'db.nvlnyhyldrpuvhjwfjxc.supabase.co',
+  port: 5432,
+  database: 'postgres',
+  user: 'postgres',
+  password: 'Techland@244190',
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
 });
+
 
 // Test the connection
 pool.on('connect', () => {
