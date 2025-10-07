@@ -1,15 +1,15 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-// Create a new connection pool using Supabase DATABASE_URL
+// Direct connection config using Supabase credentials
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
+  connectionString: 'postgresql://postgres:Techland%40244190@db.nvlnyhyldrpuvhjwfjxc.supabase.co:5432/postgres',
   ssl: {
     rejectUnauthorized: false, // Required for Supabase SSL
   },
 });
 
-// Event listeners for connection success/errors
+// Event listeners for connection status
 pool.on('connect', () => {
   console.log('✅ Connected to Supabase PostgreSQL database');
 });
@@ -22,7 +22,7 @@ pool.on('error', (err) => {
 // Create necessary tables and default data
 const createTables = async () => {
   try {
-    // Create users table
+    // Users table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS users (
         id SERIAL PRIMARY KEY,
@@ -37,7 +37,7 @@ const createTables = async () => {
       );
     `);
 
-    // Create courses table
+    // Courses table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS courses (
         id SERIAL PRIMARY KEY,
@@ -52,7 +52,7 @@ const createTables = async () => {
       );
     `);
 
-    // Create applications table
+    // Applications table
     await pool.query(`
       CREATE TABLE IF NOT EXISTS applications (
         id SERIAL PRIMARY KEY,
@@ -81,7 +81,7 @@ const createTables = async () => {
       );
     `);
 
-    // Insert default admin user if it doesn't exist
+    // Add default admin if not exists
     const adminCheck = await pool.query('SELECT * FROM users WHERE email = $1', ['admin@eston.edu.gh']);
     if (adminCheck.rows.length === 0) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
@@ -98,7 +98,7 @@ const createTables = async () => {
   }
 };
 
-// Export for use in server
+// Export for use in the app
 module.exports = {
   query: (text, params) => pool.query(text, params),
   createTables
